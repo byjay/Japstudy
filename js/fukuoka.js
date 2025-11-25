@@ -162,7 +162,9 @@ function loadPlaceDetails(query, panel) {
     };
 
     placesService.findPlaceFromQuery(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results[0]) {
+        console.log('[Fukuoka][Places] findPlaceFromQuery status =', status, 'query =', query, 'results =', results);
+
+        if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
             const place = results[0];
 
             // 가격대 표시 ($)
@@ -254,7 +256,23 @@ function loadPlaceDetails(query, panel) {
                 });
             }
         } else {
-            panel.innerHTML = `<p class="text-center text-red-500 text-sm">정보를 불러올 수 없습니다.</p>`;
+            // API 실패 시에도 사용자가 직접 구글맵에서 정보를 볼 수 있도록 최소 링크 제공
+            const encoded = encodeURIComponent(query);
+            panel.dataset.loaded = true;
+            panel.innerHTML = `
+                <div class="space-y-3 text-center">
+                    <p class="text-red-500 text-sm mb-1">정보를 불러올 수 없습니다. (Google Places API 응답: ${status})</p>
+                    <p class="text-xs text-gray-500 mb-2">아래 버튼을 눌러 구글맵에서 직접 장소 정보를 확인해 주세요.</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encoded}" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg text-sm font-bold transition">
+                            <i class="fas fa-search-location mr-1"></i>구글맵에서 "${query}" 검색
+                        </a>
+                        <a href="https://www.google.com/maps/search/?api=1&query=restaurant+near+${encoded}" target="_blank" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 rounded-lg text-sm font-bold transition">
+                            <i class="fas fa-utensils mr-1"></i>주변 맛집 검색
+                        </a>
+                    </div>
+                </div>
+            `;
         }
     });
 }
