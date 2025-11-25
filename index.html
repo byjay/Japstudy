@@ -19,9 +19,9 @@
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Google Maps API -->
+    <!-- Google Maps API (Places + Directions + Geometry) -->
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkmhTzFKcxxfQIrYlkcFjXAgIDdTZMdvU&callback=initFukuokaTrip&libraries=places&v=weekly"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkmhTzFKcxxfQIrYlkcFjXAgIDdTZMdvU&callback=initFukuokaTrip&libraries=places,directions,geometry&v=weekly"
         defer></script>
 
     <script>
@@ -46,7 +46,7 @@
     <!-- Login Screen -->
     <div id="login-screen"
         class="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 transition-opacity duration-300"
-        style="background-image: url('images/BACK.png'); background-size: cover; background-position: center;">
+        style="background-image: url('images/BACK.png'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: #000;">
 
         <div class="bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/50">
             <div class="text-center mb-10">
