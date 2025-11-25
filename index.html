@@ -1,239 +1,132 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#ffffff">
-    <title>JAP-BONG 일본어</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일본어 마스터 - 심층 회화 & 쓰기</title>
     
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkmhTzFKcxxfQIrYlkcFjXAgIDdTZMdvU&callback=initFukuokaTrip&libraries=places,directions,geometry&v=weekly" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Noto Sans KR', 'Noto Sans JP', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#FF4B4B',
-                        secondary: '#1E88E5',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        /* 스크롤바 숨기기 (깔끔한 앱 느낌) */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* 3D 카드 효과 */
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-        
-        /* 아이폰 하단 안전영역 처리 */
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        body { font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif; }
+        /* 부드러운 화면 전환 효과 */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
-<body class="bg-gray-50 text-gray-900 select-none h-screen flex flex-col overflow-hidden">
-
-    <div id="login-screen" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 bg-white transition-opacity duration-300"
-         style="background-image: url('images/BACK.png'); background-size: cover; background-position: center;">
-        
-        <div class="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl w-full max-w-sm border border-white/50">
-            <div class="text-center mb-8">
-                <h1 class="text-4xl font-black text-red-600 mb-1 tracking-tighter drop-shadow-sm" style="font-family: 'Noto Sans JP', sans-serif;">JAP-BONG</h1>
-                <p class="text-sm text-gray-600 font-medium">우리 가족 일본어 마스터 🍌</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="user-card group bg-white p-3 rounded-2xl shadow hover:shadow-lg border-2 border-transparent hover:border-red-400 flex flex-col items-center cursor-pointer transition-all active:scale-95" onclick="login('dad')">
-                    <img src="images/dad.png" class="w-20 h-20 rounded-full border-4 border-gray-100 group-hover:border-red-100 mb-2 object-cover">
-                    <h3 class="font-bold text-gray-800">아빠</h3>
-                </div>
-                <div class="user-card group bg-white p-3 rounded-2xl shadow hover:shadow-lg border-2 border-transparent hover:border-red-400 flex flex-col items-center cursor-pointer transition-all active:scale-95" onclick="login('mom')">
-                    <img src="images/mom_orig.png" class="w-20 h-20 rounded-full border-4 border-gray-100 group-hover:border-red-100 mb-2 object-cover">
-                    <h3 class="font-bold text-gray-800">엄마</h3>
-                </div>
-                <div class="user-card group bg-white p-3 rounded-2xl shadow hover:shadow-lg border-2 border-transparent hover:border-red-400 flex flex-col items-center cursor-pointer transition-all active:scale-95" onclick="login('sieun')">
-                    <img src="images/sieun.png" class="w-20 h-20 rounded-full border-4 border-gray-100 group-hover:border-red-100 mb-2 object-cover">
-                    <h3 class="font-bold text-gray-800">시으니</h3>
-                </div>
-                <div class="user-card group bg-white p-3 rounded-2xl shadow hover:shadow-lg border-2 border-transparent hover:border-red-400 flex flex-col items-center cursor-pointer transition-all active:scale-95" onclick="login('harong')">
-                    <img src="images/harong.png" class="w-20 h-20 rounded-full border-4 border-gray-100 group-hover:border-red-100 mb-2 object-cover">
-                    <h3 class="font-bold text-gray-800">하롱이</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <header class="bg-white shadow-sm border-b border-gray-200 h-14 flex-none z-40 relative">
-        <div class="h-full px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="bg-red-600 p-1 rounded-md">
-                    <i class="fas fa-torii-gate text-white text-sm"></i>
-                </div>
-                <h1 class="text-base font-black text-gray-800 tracking-tight">JAP-BONG</h1>
-            </div>
-            <div class="flex items-center space-x-2">
-                <div class="flex items-center bg-gray-100 rounded-full px-2 py-0.5 border border-gray-200">
-                    <span id="current-user-avatar" class="mr-1 text-xs"></span>
-                    <span id="current-user-name" class="text-xs font-bold text-gray-600"></span>
-                </div>
-                <button onclick="logout()" class="text-gray-400 hover:text-red-500 p-1">
-                    <i class="fas fa-sign-out-alt text-sm"></i>
-                </button>
-            </div>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-indigo-600 flex items-center gap-2">
+                <i class="fas fa-shapes"></i> 일본어 마스터
+            </h1>
+            <button onclick="location.reload()" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-home"></i> 홈으로
+            </button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 relative w-full">
+    <main class="flex-grow max-w-4xl mx-auto w-full p-4 md:p-6">
         
-        <div id="home" class="tab-content active h-full flex items-center justify-center p-4">
-            <div id="main-menu" class="grid grid-cols-2 gap-4 w-full max-w-md">
-                <button onclick="showTab('fukuoka')" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-transparent hover:border-red-400 active:scale-95 transition-all flex flex-col items-center gap-3">
-                    <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-3xl">✈️</div>
-                    <span class="font-bold text-gray-700">후쿠오카</span>
-                </button>
-                <button onclick="showTab('conversation')" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-transparent hover:border-blue-400 active:scale-95 transition-all flex flex-col items-center gap-3">
-                    <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-3xl">💬</div>
-                    <span class="font-bold text-gray-700">실전 회화</span>
-                </button>
-                <button onclick="showTab('vocabulary')" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-transparent hover:border-green-400 active:scale-95 transition-all flex flex-col items-center gap-3">
-                    <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center text-3xl">📖</div>
-                    <span class="font-bold text-gray-700">단어장</span>
-                </button>
-                <button onclick="showTab('characters')" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-transparent hover:border-purple-400 active:scale-95 transition-all flex flex-col items-center gap-3">
-                    <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center text-3xl">✍️</div>
-                    <span class="font-bold text-gray-700">글자 연습</span>
-                </button>
-            </div>
-        </div>
-
-        <div id="fukuoka" class="tab-content hidden h-full flex flex-col">
-            <div class="flex-none px-4 pt-4 pb-2 bg-gray-50 z-10">
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-2 rounded text-xs text-yellow-800 mb-3 shadow-sm">
-                    <i class="fas fa-info-circle mr-1"></i> 장소를 누르면 <strong>[가는 법]</strong>과 <strong>[메뉴]</strong>가 나와요!
+        <div id="main-menu" class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group text-center">
+                <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-200 transition-colors">
+                    <i class="fas fa-pen-nib text-3xl text-indigo-600"></i>
                 </div>
-                <div id="day-tabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                    </div>
+                <h2 class="text-2xl font-bold mb-2">글자 쓰기 & 퀴즈</h2>
+                <p class="text-gray-500 mb-6">히라가나/가타카나 50음도 쓰기 연습 및 객관식 퀴즈</p>
+                <button class="px-6 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-medium hover:bg-indigo-100 w-full">
+                    연습 하러가기 (준비중)
+                </button>
             </div>
+
+            <div onclick="startConversationMode()" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group text-center border-l-4 border-l-blue-500">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-comments text-3xl text-blue-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">실전 회화 연습</h2>
+                <p class="text-gray-500 mb-6">공항, 호텔, 식당 등 10개 상황별<br>티키타카 대화 학습</p>
+                <button class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 w-full shadow-lg shadow-blue-200">
+                    회화 시작하기
+                </button>
+            </div>
+        </div>
+
+        <div id="conversation-wrapper" style="display: none;" class="fade-in">
             
-            <div class="flex-1 overflow-y-auto px-4 pb-24 space-y-4">
-                <div id="itinerary-content" class="space-y-4"></div>
-                <div class="bg-white rounded-xl shadow p-1 h-64 border border-gray-200 sticky bottom-0 z-0">
-                    <div id="map" class="w-full h-full rounded-lg bg-gray-100"></div>
+            <div id="conversation-categories">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">회화 주제 선택</h2>
+                    <button onclick="exitConversationMode()" class="text-sm text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-1"></i> 메뉴로
+                    </button>
+                </div>
+                <div id="conversation-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <div id="conversation-lesson" style="display: none;">
+                <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <button onclick="backToConversationCategories()" class="text-gray-500 hover:text-blue-600 transition-colors px-2">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <h3 id="conversation-lesson-title" class="text-lg font-bold text-gray-800">
+                        </h3>
+                    <div class="w-8"></div> </div>
+
+                <div id="conversation-content" class="mb-8">
+                    </div>
+
+                <div class="flex items-center justify-between max-w-3xl mx-auto px-4 pb-12">
+                    <button id="conv-prev-btn" onclick="previousConversation()" class="px-6 py-3 rounded-lg bg-gray-100 text-gray-400 font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> 이전
+                    </button>
+                    <button id="conv-next-btn" onclick="nextConversation()" class="px-6 py-3 rounded-lg bg-blue-600 text-white shadow-md hover:bg-blue-700 font-medium transition-all">
+                        다음 <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
                 </div>
             </div>
+
         </div>
-
-        <div id="conversation" class="tab-content hidden h-full flex flex-col">
-            <div class="flex-none px-4 pt-4">
-                <h2 class="text-xl font-black text-gray-800 mb-3"><span class="text-blue-500">💬</span> 실전 회화</h2>
-                <div id="conversation-category-buttons" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    </div>
-            </div>
-            
-            <div id="conversation-content" class="flex-1 px-4 flex flex-col justify-center min-h-0 relative">
-                <div class="text-center text-gray-400"><i class="fas fa-spinner fa-spin"></i> 로딩중...</div>
-            </div>
-
-            <div class="flex-none p-4 mb-2">
-                <div class="bg-white border border-gray-100 shadow-lg rounded-2xl p-2 flex justify-between items-center">
-                    <button onclick="previousConversation()" class="w-12 h-12 rounded-xl bg-gray-50 text-gray-500 active:bg-gray-200"><i class="fas fa-chevron-left"></i></button>
-                    <span id="conv-progress" class="text-xs font-bold text-gray-400">1 / 10</span>
-                    <button onclick="nextConversation()" class="w-12 h-12 rounded-xl bg-blue-500 text-white shadow-md active:bg-blue-600"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="vocabulary" class="tab-content hidden p-4 pb-20">
-            <div id="vocab-categories" class="grid grid-cols-2 gap-3"></div>
-            <div id="vocab-study" class="hidden h-full flex flex-col"></div>
-        </div>
-        
-        <div id="word_study" class="tab-content hidden h-full flex flex-col p-4">
-             <div id="word-categories" class="grid grid-cols-1 gap-4"></div>
-             <div id="word-lesson" class="hidden h-full flex flex-col">
-                 </div>
-        </div>
-
-        <div id="characters" class="tab-content hidden h-full flex flex-col">
-            <div class="flex-none flex justify-center space-x-2 p-4 bg-gray-50 z-10">
-                <button onclick="showCharacterGrid('hiragana')" id="tab-hiragana" data-type="hiragana" class="char-type-tab px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm">히라가나</button>
-                <button onclick="showCharacterGrid('katakana')" id="tab-katakana" data-type="katakana" class="char-type-tab px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm">가타카나</button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto px-2 pb-20">
-                <div id="character-grid" class="grid grid-cols-5 gap-1.5 sm:grid-cols-8 pb-4">
-                    </div>
-            </div>
-            
-            <div id="character-study-container" class="hidden fixed inset-0 z-50"></div>
-        </div>
-
-    </main>
-
-    <nav class="bg-white border-t border-gray-200 h-16 pb-safe flex-none z-50">
-        <div class="grid grid-cols-5 h-full">
-            <button onclick="showTab('home')" class="nav-tab flex flex-col items-center justify-center text-gray-400 hover:text-red-500 active:text-red-600 transition-colors">
-                <i class="fas fa-home mb-1 text-lg"></i>
-                <span class="text-[10px] font-medium">홈</span>
-            </button>
-            <button onclick="showTab('fukuoka')" class="nav-tab flex flex-col items-center justify-center text-gray-400 hover:text-red-500 active:text-red-600 transition-colors">
-                <i class="fas fa-plane mb-1 text-lg"></i>
-                <span class="text-[10px] font-medium">여행</span>
-            </button>
-            <button onclick="showTab('conversation')" class="nav-tab flex flex-col items-center justify-center text-gray-400 hover:text-red-500 active:text-red-600 transition-colors">
-                <i class="fas fa-comments mb-1 text-lg"></i>
-                <span class="text-[10px] font-medium">회화</span>
-            </button>
-            <button onclick="showTab('vocabulary')" class="nav-tab flex flex-col items-center justify-center text-gray-400 hover:text-red-500 active:text-red-600 transition-colors">
-                <i class="fas fa-book mb-1 text-lg"></i>
-                <span class="text-[10px] font-medium">단어</span>
-            </button>
-            <button onclick="showTab('characters')" class="nav-tab flex flex-col items-center justify-center text-gray-400 hover:text-red-500 active:text-red-600 transition-colors">
-                <i class="fas fa-pen-nib mb-1 text-lg"></i>
-                <span class="text-[10px] font-medium">글자</span>
-            </button>
-        </div>
-    </nav>
-
-    <script src="js/auth.js?v=4"></script>
-    <script src="js/ui.js?v=4"></script>
-    <script src="js/templates.js?v=4"></script>
-    <script src="js/words_data.js?v=4"></script>
-    <script src="js/fukuoka.js?v=4"></script>
-    <script src="js/conversation.js?v=4"></script>
-    <script src="js/vocabulary.js?v=4"></script>
-    <script src="js/characters.js?v=4"></script>
-    <script src="js/word_study.js?v=4"></script>
-    <script src="js/study.js?v=4"></script>
-    <script src="js/progress.js?v=4"></script>
+        </main>
 
     <script>
-        // 초기 로딩 시 홈 탭 보장
-        window.addEventListener('DOMContentLoaded', () => {
-            if(typeof showTab === 'function') showTab('home');
-            
-            // 로그인 체크 (auth.js가 로드된 후)
-            if(localStorage.getItem('currentUser')) {
-                document.getElementById('login-screen').classList.add('hidden');
+        // conversation.js에 있는 playAudio 호출을 실제로 작동하게 만드는 함수
+        window.playAudio = function(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ja-JP'; // 일본어로 설정
+                utterance.rate = 0.9;     // 속도 약간 느리게
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
             }
-        });
+        };
+
+        // 메인 메뉴 <-> 회화 모드 전환 스크립트
+        function startConversationMode() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('conversation-wrapper').style.display = 'block';
+            
+            // conversation.js의 초기화 함수 호출
+            if (typeof initConversation === 'function') {
+                initConversation(); 
+            } else {
+                alert('conversation.js 파일이 연결되지 않았습니다.');
+            }
+        }
+
+        function exitConversationMode() {
+            document.getElementById('conversation-wrapper').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'grid';
+        }
     </script>
+
+    <script src="conversation.js"></script>
 
 </body>
 </html>
