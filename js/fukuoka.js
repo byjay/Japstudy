@@ -134,7 +134,7 @@ function renderSchedule(day) {
             if (wasHidden) {
                 panel.classList.remove('hidden');
                 if (!panel.dataset.loaded) {
-                    loadPlaceDetails(item.query, panel);
+                    loadPlaceDetails(item.query, panel, item);
                 }
             }
         };
@@ -147,7 +147,7 @@ function renderSchedule(day) {
     }
 }
 
-function loadPlaceDetails(query, panel) {
+function loadPlaceDetails(query, panel, item) {
     panel.innerHTML = `<div class="spinner border-4 border-gray-200 border-t-blue-500 rounded-full w-6 h-6 animate-spin mx-auto"></div><p class="text-center text-xs text-gray-500 mt-2">구글 최신 정보 불러오는 중...</p>`;
 
     if (typeof google === 'undefined' || !placesService) {
@@ -155,14 +155,20 @@ function loadPlaceDetails(query, panel) {
         return;
     }
 
-    const request = {
+    // 제주 플래너와 비슷하게 textSearch + 위치/반경을 사용
+    const textRequest = {
         query: query,
-        // geometry를 포함해야 주변 맛집 검색(nearbySearch)에 사용할 수 있음
-        fields: ['name', 'rating', 'user_ratings_total', 'photos', 'formatted_address', 'price_level', 'place_id', 'url', 'geometry']
+        language: 'ko'
     };
 
-    placesService.findPlaceFromQuery(request, (results, status) => {
-        console.log('[Fukuoka][Places] findPlaceFromQuery status =', status, 'query =', query, 'results =', results);
+    // 좌표가 있으면 주변 검색으로 정확도 향상
+    if (item && typeof item.lat === 'number' && typeof item.lng === 'number') {
+        textRequest.location = new google.maps.LatLng(item.lat, item.lng);
+        textRequest.radius = 1500;
+    }
+
+    placesService.textSearch(textRequest, (results, status) => {
+        console.log('[Fukuoka][Places] textSearch status =', status, 'query =', query, 'results =', results);
 
         if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
             const place = results[0];
