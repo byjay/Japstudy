@@ -1,8 +1,8 @@
 /**
- * characters.js - 50음도 학습, 쓰기(획순), 퀴즈 시스템 (All-in-One Ver.)
+ * characters.js - 50음도 학습, 쓰기, 퀴즈, 통계 시스템 (Final Complete Ver.)
  */
 
-// --- 1. 데이터 (50음도 + 획순 이미지 매핑용) ---
+// --- 1. 데이터 (50음도) ---
 const charData = {
     hiragana: [
         { char: 'あ', romaji: 'a', pron: '아' }, { char: 'い', romaji: 'i', pron: '이' }, { char: 'う', romaji: 'u', pron: '우' }, { char: 'え', romaji: 'e', pron: '에' }, { char: 'お', romaji: 'o', pron: '오' },
@@ -36,8 +36,9 @@ const charData = {
 let currentCanvas = null;
 let currentContext = null;
 let isDrawing = false;
-let currentMode = 'hiragana'; // hiragana, katakana
-let currentIndex = 0; // 현재 학습 중인 글자 인덱스
+let currentMode = 'hiragana';
+let currentIndex = 0;
+let studyStartTime = 0; // 학습 시작 시간 측정용
 
 // 퀴즈 변수
 let quizQuestions = [];
@@ -52,9 +53,10 @@ function showCharacterGrid(type) {
     const tabHiragana = document.getElementById('tab-hiragana');
     const tabKatakana = document.getElementById('tab-katakana');
 
-    // 퀴즈 화면 끄기 (혹시 켜져있으면)
+    // 모달 닫기
     closeQuizModal();
     closeWritingModal();
+    closeHistoryModal(); // 통계 모달 닫기
 
     if (!grid) return;
 
@@ -67,105 +69,140 @@ function showCharacterGrid(type) {
         tabKatakana.className = "char-type-tab px-6 py-2 rounded-full font-bold text-white bg-blue-500 shadow-md transition-transform active:scale-95";
     }
 
-    // 퀴즈 버튼 영역을 character-grid-container 위에 별도로 추가
-    const container = document.getElementById('character-grid-container');
-    if (container) {
-        // 기존 퀴즈 버튼 있으면 제거
-        const existingQuizButtons = document.getElementById('quiz-buttons-area');
-        if (existingQuizButtons) existingQuizButtons.remove();
+    // 퀴즈 및 통계 버튼 (상단 배치)
+    let topButtonsHTML = `
+        <div class="col-span-full mb-4 space-y-3">
+            <div class="flex gap-2 justify-center">
+                <button onclick="startQuiz('hiragana')" class="flex-1 max-w-[120px] px-3 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-bold hover:bg-red-200 transition shadow-sm">
+                    <i class="fas fa-question-circle"></i> 히라가나
+                </button>
+                <button onclick="startQuiz('katakana')" class="flex-1 max-w-[120px] px-3 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-200 transition shadow-sm">
+                    <i class="fas fa-question-circle"></i> 가타카나
+                </button>
+                <button onclick="startQuiz('mix')" class="flex-1 max-w-[120px] px-3 py-2 bg-purple-100 text-purple-600 rounded-lg text-sm font-bold hover:bg-purple-200 transition shadow-sm">
+                    <i class="fas fa-random"></i> 복합 퀴즈
+                </button>
+            </div>
+            <div class="flex justify-center">
+                <button onclick="showHistory()" class="w-full max-w-sm px-4 py-2 bg-gray-800 text-white rounded-xl text-sm font-bold hover:bg-gray-900 transition shadow-md">
+                    <i class="fas fa-chart-line text-yellow-400 mr-2"></i> 나의 학습 통계 (History)
+                </button>
+            </div>
+        </div>
+    `;
 
-        // 새 퀴즈 버튼 영역 추가
-        const quizButtonsDiv = document.createElement('div');
-        quizButtonsDiv.id = 'quiz-buttons-area';
-        quizButtonsDiv.className = 'flex gap-2 justify-center mb-4';
-        quizButtonsDiv.innerHTML = `
-            <button onclick="startQuiz('hiragana')" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-bold hover:bg-red-200 transition">
-                <i class="fas fa-question-circle"></i> 히라가나 퀴즈
-            </button>
-            <button onclick="startQuiz('katakana')" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-200 transition">
-                <i class="fas fa-question-circle"></i> 가타카나 퀴즈
-            </button>
-            <button onclick="startQuiz('mix')" class="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg text-sm font-bold hover:bg-purple-200 transition">
-                <i class="fas fa-random"></i> 통합 퀴즈
-            </button>
-        `;
-        container.insertBefore(quizButtonsDiv, grid);
-    }
-
-    // 그리드 생성 (퀴즈 버튼 제거)
+    // 그리드 생성
     const data = charData[type];
     const gridHTML = data.map((item, idx) => {
         if (!item.char) return `<div class="invisible"></div>`;
 
+        // 마스터 여부 체크 (간단히 localStorage 사용 기록 체크)
+        const history = getStudyHistory();
+        const isMastered = history.masteredChars.includes(item.char);
+        const masterBadge = isMastered ? '<span class="absolute top-1 right-1 text-[10px] text-yellow-500">⭐</span>' : '';
+
         return `
             <button onclick="currentIndex=${idx}; openWritingModal('${item.char}', '${item.pron}', '${item.romaji}')" 
-                class="flex flex-col items-center justify-center bg-white rounded-lg border border-gray-200 shadow-sm active:bg-gray-50 active:scale-95 transition-all h-16">
+                class="relative flex flex-col items-center justify-center bg-white rounded-lg border ${isMastered ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200'} shadow-sm active:bg-gray-50 active:scale-95 transition-all h-16">
+                ${masterBadge}
                 <span class="text-xl font-bold text-gray-800 leading-none mb-1" style="font-family: 'Noto Sans JP', sans-serif;">${item.char}</span>
                 <span class="text-[10px] text-gray-400 font-medium leading-none">${item.pron}</span>
             </button>
         `;
     }).join('');
 
-    grid.innerHTML = gridHTML;
+    grid.innerHTML = topButtonsHTML + gridHTML;
 }
 
 
-// --- 2. 쓰기 연습 모달 (기능 강화) ---
+// --- 2. 쓰기 연습 모달 (행 표시 및 획순 기능 강화) ---
 
 function openWritingModal(char, pron, romaji) {
+    studyStartTime = Date.now(); // 학습 시작 시간 기록
+    saveStudyLog('view', char); // 학습 기록 저장
+
     const container = document.getElementById('character-study-container');
 
+    // [기능 추가] 상단 행(Row) 글자 가져오기 (5개 단위)
+    const list = charData[currentMode];
+    const rowStartIdx = Math.floor(currentIndex / 5) * 5;
+    const rowItems = list.slice(rowStartIdx, rowStartIdx + 5);
+
+    // 상단 행 네비게이션 HTML 생성
+    const rowNavHTML = rowItems.map(item => {
+        if (!item.char) return `<div class="w-8"></div>`;
+        const isCurrent = item.char === char;
+        return `
+            <div class="flex flex-col items-center justify-center w-9 h-9 rounded-lg ${isCurrent ? 'bg-red-500 text-white shadow-md transform scale-110 ring-2 ring-red-200' : 'bg-white text-gray-400 border border-gray-100'}">
+                <span class="text-sm font-bold">${item.char}</span>
+            </div>
+        `;
+    }).join('');
+
+    // 획순 이미지 (위키미디어)
+    const strokeUrl = `https://upload.wikimedia.org/wikipedia/commons/6/6f/BW_Hiragana_${romaji}_2021.svg`;
+
     container.innerHTML = `
-        <div class="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-2 backdrop-blur-sm">
+        <div class="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-2 backdrop-blur-sm animate-fade-in">
             
-            <div class="w-full max-w-md flex justify-between items-center mb-4 px-2">
-                <div class="text-white">
-                    <h3 class="text-3xl font-black inline-block mr-2">${char}</h3>
-                    <span class="text-gray-300 text-lg">${pron} [${romaji}]</span>
+            <div class="w-full max-w-md flex flex-col items-center mb-4 gap-3">
+                <div class="w-full flex justify-between items-center px-2">
+                    <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">${currentMode.toUpperCase()} STUDY</span>
+                    <button onclick="closeWritingModal()" class="px-3 py-1 rounded-full bg-white/20 text-white text-xs hover:bg-white/30">
+                        닫기 <i class="fas fa-times ml-1"></i>
+                    </button>
                 </div>
-                <button onclick="closeWritingModal()" class="px-3 py-1 rounded-full bg-white/20 text-white text-sm hover:bg-white/30">
-                    닫기 <i class="fas fa-times ml-1"></i>
-                </button>
+                <div class="flex gap-2 p-2 bg-gray-800/50 rounded-xl backdrop-blur-md">
+                    ${rowNavHTML}
+                </div>
             </div>
 
-            <div class="flex gap-2 items-center justify-center w-full max-w-lg mb-4">
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full max-w-2xl mb-4">
                 
-                <div class="hidden sm:flex flex-col items-center justify-center bg-white rounded-2xl w-24 h-[300px] shadow-lg p-2">
-                    <span class="text-xs text-gray-500 font-bold mb-2">획순 보기</span>
-                    <div class="flex-1 flex items-center justify-center w-full overflow-hidden">
-                        <span class="text-5xl font-serif text-gray-300 border-2 border-dashed border-gray-200 rounded-lg p-2 w-16 h-16 flex items-center justify-center">
-                            ${char}
-                        </span>
+                <div class="flex flex-col gap-2 w-full max-w-[200px]">
+                    <div class="bg-white rounded-2xl p-4 text-center shadow-lg">
+                        <h3 class="text-5xl font-black text-gray-800 mb-1" style="font-family: 'Noto Sans JP', sans-serif;">${char}</h3>
+                        <p class="text-gray-500 font-bold text-lg">${pron} <span class="text-gray-300 font-normal">[${romaji}]</span></p>
                     </div>
-                    <p class="text-[10px] text-gray-400 text-center mt-2">점선을 따라<br>써보세요!</p>
+                    
+                    <div class="bg-white rounded-2xl p-2 text-center shadow-lg flex-1 min-h-[150px] flex flex-col items-center justify-center relative overflow-hidden">
+                        <span class="absolute top-2 left-2 text-[10px] text-gray-400 font-bold bg-gray-100 px-1 rounded">획순 가이드</span>
+                        <div class="w-24 h-24 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center">
+                            <span class="text-6xl text-gray-200 font-serif absolute opacity-50">${char}</span>
+                            <img src="${strokeUrl}" class="w-full h-full object-contain relative z-10 opacity-80" onerror="this.style.display='none'">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="relative bg-white rounded-3xl shadow-2xl overflow-hidden w-[300px] h-[300px] select-none">
+                <div class="relative bg-white rounded-3xl shadow-2xl overflow-hidden w-[300px] h-[300px] select-none cursor-crosshair group">
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span class="text-[200px] text-gray-100 font-medium leading-none pb-4" style="font-family: 'Noto Sans JP', sans-serif;">
+                        <span class="text-[200px] text-gray-100 font-medium leading-none pb-4 group-hover:text-gray-200 transition-colors" 
+                              style="font-family: 'Noto Sans JP', sans-serif;">
                             ${char}
                         </span>
                     </div>
                     <div class="absolute w-full h-px bg-red-50 top-1/2 pointer-events-none"></div>
                     <div class="absolute h-full w-px bg-red-50 left-1/2 pointer-events-none"></div>
-                    <canvas id="writing-canvas" width="300" height="300" class="absolute inset-0 w-full h-full cursor-crosshair touch-none"></canvas>
+                    
+                    <canvas id="writing-canvas" width="300" height="300" class="absolute inset-0 w-full h-full touch-none"></canvas>
+                    
+                    <div class="absolute bottom-2 right-2 opacity-50 pointer-events-none text-[10px] text-gray-400">
+                        <i class="fas fa-pen"></i> 여기에 써보세요
+                    </div>
                 </div>
             </div>
 
-            <div class="w-full max-w-[300px] grid grid-cols-2 gap-3 mb-2">
-                <button onclick="clearCanvas()" class="py-3 bg-gray-700 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">
+            <div class="w-full max-w-[300px] grid grid-cols-2 gap-3 mb-4">
+                <button onclick="clearCanvas()" class="py-3 bg-gray-700 text-white rounded-xl font-bold shadow-lg active:scale-95 transition text-sm">
                     <i class="fas fa-eraser"></i> 지우기
                 </button>
-                <button onclick="playAudio('${char}')" class="py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">
+                <button onclick="playAudio('${char}')" class="py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg active:scale-95 transition text-sm">
                     <i class="fas fa-volume-up"></i> 듣기
                 </button>
             </div>
 
-            <div class="w-full max-w-[300px] flex justify-between gap-3 mt-2">
-                <button onclick="closeWritingModal()" class="flex-1 py-3 bg-white text-gray-800 rounded-xl font-bold shadow border border-gray-200 active:scale-95 transition">
-                    <i class="fas fa-th"></i> 50음도
-                </button>
-                <button onclick="nextChar()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">
+            <div class="w-full max-w-[300px]">
+                <button onclick="nextChar()" class="w-full py-3.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-bold shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
                     다음 글자 <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
@@ -178,13 +215,24 @@ function openWritingModal(char, pron, romaji) {
 }
 
 function closeWritingModal() {
+    // 학습 시간 저장 로직
+    const duration = (Date.now() - studyStartTime) / 1000; // 초 단위
+    if (duration > 2) { // 2초 이상 봤을 때만 시간 인정
+        saveStudyLog('time', duration);
+    }
+
     document.getElementById('character-study-container').classList.add('hidden');
     document.getElementById('character-study-container').innerHTML = '';
+    // 그리드 리렌더링 (마스터 배지 업데이트 위해)
+    showCharacterGrid(currentMode);
 }
 
-// 다음 글자로 이동
 function nextChar() {
+    // 현재 글자 학습 완료 처리 (간단히 다음 버튼 누르면 마스터로 간주)
     const list = charData[currentMode];
+    const item = list[currentIndex];
+    if (item && item.char) saveStudyLog('master', item.char);
+
     let nextIdx = currentIndex + 1;
     while (nextIdx < list.length && !list[nextIdx].char) {
         nextIdx++;
@@ -192,8 +240,8 @@ function nextChar() {
 
     if (nextIdx < list.length) {
         currentIndex = nextIdx;
-        const item = list[currentIndex];
-        openWritingModal(item.char, item.pron, item.romaji);
+        const nextItem = list[currentIndex];
+        openWritingModal(nextItem.char, nextItem.pron, nextItem.romaji);
     } else {
         alert("마지막 글자입니다! 수고하셨어요 🎉");
         closeWritingModal();
@@ -212,7 +260,6 @@ function startQuiz(mode) {
     quizQuestions = [];
     for (let i = 0; i < 10; i++) {
         const answer = sourceData[Math.floor(Math.random() * sourceData.length)];
-
         const distractors = [];
         while (distractors.length < 3) {
             const d = sourceData[Math.floor(Math.random() * sourceData.length)];
@@ -220,7 +267,6 @@ function startQuiz(mode) {
                 distractors.push(d);
             }
         }
-
         const options = [answer, ...distractors].sort(() => Math.random() - 0.5);
         quizQuestions.push({ answer, options });
     }
@@ -239,7 +285,7 @@ function renderQuizQuestion() {
             <div class="w-full max-w-sm mb-8">
                 <div class="flex justify-between items-center mb-4">
                     <span class="font-bold text-gray-500">Q. ${currentQuestionIdx + 1} / 10</span>
-                    <button onclick="closeWritingModal()" class="text-gray-400"><i class="fas fa-times"></i></button>
+                    <button onclick="closeQuizModal()" class="text-gray-400"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div class="h-full bg-blue-500 transition-all duration-300" style="width: ${(currentQuestionIdx / 10) * 100}%"></div>
@@ -248,17 +294,18 @@ function renderQuizQuestion() {
 
             <div class="text-center mb-10">
                 <p class="text-gray-500 mb-2">이 글자의 발음은?</p>
-                <h1 class="text-8xl font-black text-gray-800">${q.answer.char}</h1>
+                <h1 class="text-8xl font-black text-gray-800 animate-bounce-short">${q.answer.char}</h1>
             </div>
 
             <div class="grid grid-cols-2 gap-4 w-full max-w-sm">
                 ${q.options.map((opt, i) => `
-                    <button onclick="checkAnswer(${i})" class="quiz-option py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-xl font-bold text-gray-700 hover:border-blue-500 hover:text-blue-600 transition">
-                        ${opt.pron} (${opt.romaji})
+                    <button onclick="checkAnswer(${i})" class="quiz-option py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-xl font-bold text-gray-700 hover:border-blue-500 hover:text-blue-600 transition shadow-sm active:scale-95">
+                        ${opt.pron}
+                        <span class="block text-xs text-gray-400 font-normal">(${opt.romaji})</span>
                     </button>
                 `).join('')}
             </div>
-</div>
+        </div>
     `;
     container.classList.remove('hidden');
 }
@@ -278,6 +325,8 @@ function checkAnswer(selectedIdx) {
 }
 
 function showQuizResult() {
+    saveStudyLog('quiz', quizScore); // 퀴즈 점수 저장
+
     const container = document.getElementById('character-study-container');
     let msg = quizScore === 10 ? "완벽해요! 🎉" : quizScore >= 7 ? "참 잘했어요! 👍" : "조금 더 연습해봐요 💪";
 
@@ -287,16 +336,21 @@ function showQuizResult() {
             <h2 class="text-3xl font-black text-gray-800 mb-2">퀴즈 종료!</h2>
             <p class="text-gray-500 mb-8">${msg}</p>
             
-            <div class="bg-gray-50 px-8 py-6 rounded-3xl mb-8 text-center border border-gray-100">
+            <div class="bg-gray-50 px-8 py-6 rounded-3xl mb-8 text-center border border-gray-100 shadow-inner">
                 <span class="block text-sm text-gray-400 uppercase tracking-widest mb-1">SCORE</span>
                 <span class="text-5xl font-black ${quizScore >= 7 ? 'text-blue-500' : 'text-red-500'}">
                     ${quizScore} <span class="text-2xl text-gray-300">/ 10</span>
                 </span>
             </div>
 
-            <button onclick="showCharacterGrid(currentMode)" class="w-full max-w-xs py-4 bg-gray-800 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">
-                돌아가기
-            </button>
+            <div class="flex flex-col w-full max-w-xs gap-2">
+                <button onclick="showCharacterGrid(currentMode)" class="w-full py-4 bg-gray-800 text-white rounded-xl font-bold shadow-lg active:scale-95 transition">
+                    목록으로
+                </button>
+                <button onclick="startQuiz('mix')" class="w-full py-4 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 active:scale-95 transition">
+                    다시 하기
+                </button>
+            </div>
         </div>
     `;
 }
@@ -308,7 +362,105 @@ function closeQuizModal() {
 }
 
 
-// --- 4. 캔버스 로직 ---
+// --- 4. 통계 및 이력 관리 (LocalStorage) ---
+
+const STORAGE_KEY = 'jap_bong_history_v1';
+
+function getStudyHistory() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+        return {
+            logs: [], // { date: 'YYYY-MM-DD', type: 'view'|'quiz'|'time', val: ... }
+            masteredChars: [] // ['あ', 'い', ...]
+        };
+    }
+    return JSON.parse(raw);
+}
+
+function saveStudyLog(type, value) {
+    const history = getStudyHistory();
+    const today = new Date().toISOString().split('T')[0];
+
+    // 로그 추가
+    history.logs.push({ date: today, type: type, val: value, ts: Date.now() });
+
+    // 마스터 처리 (중복 방지)
+    if (type === 'master' && !history.masteredChars.includes(value)) {
+        history.masteredChars.push(value);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+}
+
+function showHistory() {
+    const history = getStudyHistory();
+    const container = document.getElementById('character-study-container');
+
+    // 분석 로직
+    const totalTimeSec = history.logs.filter(l => l.type === 'time').reduce((a, b) => a + parseFloat(b.val), 0);
+    const totalTimeMin = Math.floor(totalTimeSec / 60);
+    const quizLogs = history.logs.filter(l => l.type === 'quiz');
+    const avgQuizScore = quizLogs.length > 0 ? (quizLogs.reduce((a, b) => a + b.val, 0) / quizLogs.length).toFixed(1) : 0;
+    const masteredCount = history.masteredChars.length;
+
+    // 일별 공부 횟수 (최근 7일)
+    // 간단한 차트 대신 텍스트로 표현
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = history.logs.filter(l => l.date === today).length;
+
+    container.innerHTML = `
+        <div class="fixed inset-0 z-50 bg-gray-900/95 flex flex-col items-center justify-center p-4 animate-fade-in text-white">
+            <div class="w-full max-w-md bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700">
+                <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white"><i class="fas fa-chart-pie mr-2 text-yellow-400"></i>학습 리포트</h2>
+                    <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <div class="p-6 grid grid-cols-2 gap-4">
+                    <div class="bg-gray-700/50 p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 mb-1">총 학습 시간</p>
+                        <p class="text-2xl font-bold text-blue-400">${totalTimeMin}<span class="text-sm text-gray-500">분</span></p>
+                    </div>
+                    <div class="bg-gray-700/50 p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 mb-1">마스터한 글자</p>
+                        <p class="text-2xl font-bold text-green-400">${masteredCount}<span class="text-sm text-gray-500">자</span></p>
+                    </div>
+                    <div class="bg-gray-700/50 p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 mb-1">퀴즈 평균 점수</p>
+                        <p class="text-2xl font-bold text-purple-400">${avgQuizScore}<span class="text-sm text-gray-500">점</span></p>
+                    </div>
+                    <div class="bg-gray-700/50 p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 mb-1">오늘 활동량</p>
+                        <p class="text-2xl font-bold text-orange-400">${todayCount}<span class="text-sm text-gray-500">회</span></p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <h3 class="text-sm font-bold text-gray-300 mb-3">🏆 학습 등급</h3>
+                    <div class="w-full bg-gray-700 rounded-full h-4 mb-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-yellow-400 to-red-500 h-4 rounded-full transition-all duration-1000" style="width: ${Math.min((masteredCount / 100) * 100, 100)}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 text-right">전체 100자 중 ${masteredCount}자 완료</p>
+                </div>
+                
+                <div class="p-4 bg-gray-900/50 text-center">
+                    <button onclick="closeHistoryModal()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-bold transition">닫기</button>
+                    <button onclick="localStorage.removeItem(STORAGE_KEY); alert('초기화됨'); showHistory();" class="px-6 py-2 text-red-400 hover:text-red-300 rounded-lg text-xs transition ml-2">기록 초기화</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.classList.remove('hidden');
+}
+
+function closeHistoryModal() {
+    const container = document.getElementById('character-study-container');
+    container.classList.add('hidden');
+    container.innerHTML = '';
+}
+
+
+// --- 5. 캔버스 로직 (공통) ---
 function initCanvas() {
     const canvas = document.getElementById('writing-canvas');
     if (!canvas) return;
@@ -317,7 +469,7 @@ function initCanvas() {
     ctx.lineWidth = 14;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(255, 75, 75, 0.8)';
+    ctx.strokeStyle = 'rgba(255, 75, 75, 0.8)'; // 반투명 붉은색
 
     currentCanvas = canvas;
     currentContext = ctx;
@@ -404,6 +556,8 @@ window.clearCanvas = clearCanvas;
 window.playAudio = playAudio;
 window.startQuiz = startQuiz;
 window.checkAnswer = checkAnswer;
+window.showHistory = showHistory;
+window.closeHistoryModal = closeHistoryModal;
 
 // 로드 시 초기화
 document.addEventListener('DOMContentLoaded', () => {
@@ -413,4 +567,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('characters.js loaded - All-in-One Ver.');
+console.log('characters.js loaded - All-in-One Final.');
