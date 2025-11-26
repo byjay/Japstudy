@@ -3,7 +3,6 @@
  */
 
 // --- 1. 데이터 (50음도 + 획순 이미지 매핑용) ---
-// * 획순 이미지는 위키미디어 공용 URL 패턴을 사용합니다.
 const charData = {
     hiragana: [
         { char: 'あ', romaji: 'a', pron: '아' }, { char: 'い', romaji: 'i', pron: '이' }, { char: 'う', romaji: 'u', pron: '우' }, { char: 'え', romaji: 'e', pron: '에' }, { char: 'お', romaji: 'o', pron: '오' },
@@ -13,10 +12,10 @@ const charData = {
         { char: 'な', romaji: 'na', pron: '나' }, { char: 'に', romaji: 'ni', pron: '니' }, { char: 'ぬ', romaji: 'nu', pron: '누' }, { char: 'ね', romaji: 'ne', pron: '네' }, { char: 'の', romaji: 'no', pron: '노' },
         { char: 'は', romaji: 'ha', pron: '하' }, { char: 'ひ', romaji: 'hi', pron: '히' }, { char: 'ふ', romaji: 'fu', pron: '후' }, { char: 'へ', romaji: 'he', pron: '헤' }, { char: 'ほ', romaji: 'ho', pron: '호' },
         { char: 'ま', romaji: 'ma', pron: '마' }, { char: 'み', romaji: 'mi', pron: '미' }, { char: 'む', romaji: 'mu', pron: '무' }, { char: 'め', romaji: 'me', pron: '메' }, { char: 'も', romaji: 'mo', pron: '모' },
-        { char: 'や', romaji: 'ya', pron: '야' }, { char: '', romaji: '', pron: '' },     { char: 'ゆ', romaji: 'yu', pron: '유' }, { char: '', romaji: '', pron: '' },     { char: 'よ', romaji: 'yo', pron: '요' },
+        { char: 'や', romaji: 'ya', pron: '야' }, { char: '', romaji: '', pron: '' }, { char: 'ゆ', romaji: 'yu', pron: '유' }, { char: '', romaji: '', pron: '' }, { char: 'よ', romaji: 'yo', pron: '요' },
         { char: 'ら', romaji: 'ra', pron: '라' }, { char: 'り', romaji: 'ri', pron: '리' }, { char: 'る', romaji: 'ru', pron: '루' }, { char: 'れ', romaji: 're', pron: '레' }, { char: 'ろ', romaji: 'ro', pron: '로' },
-        { char: 'わ', romaji: 'wa', pron: '와' }, { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: 'を', romaji: 'wo', pron: '오' },
-        { char: 'ん', romaji: 'n', pron: '응' },  { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' }
+        { char: 'わ', romaji: 'wa', pron: '와' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: 'を', romaji: 'wo', pron: '오' },
+        { char: 'ん', romaji: 'n', pron: '응' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }
     ],
     katakana: [
         { char: 'ア', romaji: 'a', pron: '아' }, { char: 'イ', romaji: 'i', pron: '이' }, { char: 'ウ', romaji: 'u', pron: '우' }, { char: 'エ', romaji: 'e', pron: '에' }, { char: 'オ', romaji: 'o', pron: '오' },
@@ -26,10 +25,10 @@ const charData = {
         { char: 'ナ', romaji: 'na', pron: '나' }, { char: 'ニ', romaji: 'ni', pron: '니' }, { char: 'ヌ', romaji: 'nu', pron: '누' }, { char: 'ネ', romaji: 'ne', pron: '네' }, { char: 'ノ', romaji: 'no', pron: '노' },
         { char: 'ハ', romaji: 'ha', pron: '하' }, { char: 'ヒ', romaji: 'hi', pron: '히' }, { char: 'フ', romaji: 'fu', pron: '후' }, { char: 'ヘ', romaji: 'he', pron: '헤' }, { char: 'ホ', romaji: 'ho', pron: '호' },
         { char: 'マ', romaji: 'ma', pron: '마' }, { char: 'ミ', romaji: 'mi', pron: '미' }, { char: 'ム', romaji: 'mu', pron: '무' }, { char: 'メ', romaji: 'me', pron: '메' }, { char: 'モ', romaji: 'mo', pron: '모' },
-        { char: 'ヤ', romaji: 'ya', pron: '야' }, { char: '', romaji: '', pron: '' },     { char: 'ユ', romaji: 'yu', pron: '유' }, { char: '', romaji: '', pron: '' },     { char: 'ヨ', romaji: 'yo', pron: '요' },
+        { char: 'ヤ', romaji: 'ya', pron: '야' }, { char: '', romaji: '', pron: '' }, { char: 'ユ', romaji: 'yu', pron: '유' }, { char: '', romaji: '', pron: '' }, { char: 'ヨ', romaji: 'yo', pron: '요' },
         { char: 'ラ', romaji: 'ra', pron: '라' }, { char: 'リ', romaji: 'ri', pron: '리' }, { char: 'ル', romaji: 'ru', pron: '루' }, { char: 'レ', romaji: 're', pron: '레' }, { char: 'ロ', romaji: 'ro', pron: '로' },
-        { char: 'ワ', romaji: 'wa', pron: '와' }, { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: 'ヲ', romaji: 'wo', pron: '오' },
-        { char: 'ン', romaji: 'n', pron: '응' },  { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' },     { char: '', romaji: '', pron: '' }
+        { char: 'ワ', romaji: 'wa', pron: '와' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: 'ヲ', romaji: 'wo', pron: '오' },
+        { char: 'ン', romaji: 'n', pron: '응' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }, { char: '', romaji: '', pron: '' }
     ]
 };
 
@@ -52,7 +51,7 @@ function showCharacterGrid(type) {
     const grid = document.getElementById('character-grid');
     const tabHiragana = document.getElementById('tab-hiragana');
     const tabKatakana = document.getElementById('tab-katakana');
-    
+
     // 퀴즈 화면 끄기 (혹시 켜져있으면)
     closeQuizModal();
     closeWritingModal();
@@ -68,9 +67,18 @@ function showCharacterGrid(type) {
         tabKatakana.className = "char-type-tab px-6 py-2 rounded-full font-bold text-white bg-blue-500 shadow-md transition-transform active:scale-95";
     }
 
-    // ★ 퀴즈 버튼 영역 추가
-    let quizButtonsHTML = `
-        <div class="col-span-full flex gap-2 justify-center mb-4">
+    // 퀴즈 버튼 영역을 character-grid-container 위에 별도로 추가
+    const container = document.getElementById('character-grid-container');
+    if (container) {
+        // 기존 퀴즈 버튼 있으면 제거
+        const existingQuizButtons = document.getElementById('quiz-buttons-area');
+        if (existingQuizButtons) existingQuizButtons.remove();
+
+        // 새 퀴즈 버튼 영역 추가
+        const quizButtonsDiv = document.createElement('div');
+        quizButtonsDiv.id = 'quiz-buttons-area';
+        quizButtonsDiv.className = 'flex gap-2 justify-center mb-4';
+        quizButtonsDiv.innerHTML = `
             <button onclick="startQuiz('hiragana')" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-bold hover:bg-red-200 transition">
                 <i class="fas fa-question-circle"></i> 히라가나 퀴즈
             </button>
@@ -78,16 +86,17 @@ function showCharacterGrid(type) {
                 <i class="fas fa-question-circle"></i> 가타카나 퀴즈
             </button>
             <button onclick="startQuiz('mix')" class="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg text-sm font-bold hover:bg-purple-200 transition">
-                <i class="fas fa-random"></i> 통합 퀴즈 (10문제)
+                <i class="fas fa-random"></i> 통합 퀴즈
             </button>
-        </div>
-    `;
+        `;
+        container.insertBefore(quizButtonsDiv, grid);
+    }
 
-    // 그리드 생성
+    // 그리드 생성 (퀴즈 버튼 제거)
     const data = charData[type];
     const gridHTML = data.map((item, idx) => {
         if (!item.char) return `<div class="invisible"></div>`;
-        
+
         return `
             <button onclick="currentIndex=${idx}; openWritingModal('${item.char}', '${item.pron}', '${item.romaji}')" 
                 class="flex flex-col items-center justify-center bg-white rounded-lg border border-gray-200 shadow-sm active:bg-gray-50 active:scale-95 transition-all h-16">
@@ -97,7 +106,7 @@ function showCharacterGrid(type) {
         `;
     }).join('');
 
-    grid.innerHTML = quizButtonsHTML + gridHTML;
+    grid.innerHTML = gridHTML;
 }
 
 
@@ -105,12 +114,6 @@ function showCharacterGrid(type) {
 
 function openWritingModal(char, pron, romaji) {
     const container = document.getElementById('character-study-container');
-    
-    // 획순 이미지 URL (위키미디어 공용 패턴 시도) - 없으면 엑박 대신 텍스트 가이드
-    // 실제 서비스에선 이미지를 로컬에 저장하는 것이 좋으나, 여기선 외부 링크 사용
-    const strokeUrl = `https://upload.wikimedia.org/wikipedia/commons/6/6f/BW_Hiragana_${romaji}_2021.svg`; 
-    // *주의: 위키미디어 파일명이 불규칙할 수 있어, 실제론 100% 나오진 않습니다. 
-    // 안 나올 경우를 대비해 onerror 처리를 추가했습니다.
 
     container.innerHTML = `
         <div class="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-2 backdrop-blur-sm">
@@ -179,12 +182,11 @@ function closeWritingModal() {
     document.getElementById('character-study-container').innerHTML = '';
 }
 
-// 다음 글자로 이동 (목록으로 안 나가고 바로 이동)
+// 다음 글자로 이동
 function nextChar() {
     const list = charData[currentMode];
-    // 빈 문자(공백) 건너뛰기 로직
     let nextIdx = currentIndex + 1;
-    while(nextIdx < list.length && !list[nextIdx].char) {
+    while (nextIdx < list.length && !list[nextIdx].char) {
         nextIdx++;
     }
 
@@ -199,30 +201,26 @@ function nextChar() {
 }
 
 
-// --- 3. 퀴즈 시스템 (New Feature) ---
+// --- 3. 퀴즈 시스템 ---
 
 function startQuiz(mode) {
-    // 1. 문제 출제
     let sourceData = [];
     if (mode === 'hiragana') sourceData = charData.hiragana.filter(i => i.char);
     else if (mode === 'katakana') sourceData = charData.katakana.filter(i => i.char);
     else sourceData = [...charData.hiragana, ...charData.katakana].filter(i => i.char);
 
-    // 랜덤 10문제 선정
     quizQuestions = [];
     for (let i = 0; i < 10; i++) {
         const answer = sourceData[Math.floor(Math.random() * sourceData.length)];
-        
-        // 오답 3개 선정
+
         const distractors = [];
-        while(distractors.length < 3) {
+        while (distractors.length < 3) {
             const d = sourceData[Math.floor(Math.random() * sourceData.length)];
             if (d.char !== answer.char && !distractors.includes(d)) {
                 distractors.push(d);
             }
         }
 
-        // 보기 섞기
         const options = [answer, ...distractors].sort(() => Math.random() - 0.5);
         quizQuestions.push({ answer, options });
     }
@@ -250,7 +248,7 @@ function renderQuizQuestion() {
 
             <div class="text-center mb-10">
                 <p class="text-gray-500 mb-2">이 글자의 발음은?</p>
-                <h1 class="text-8xl font-black text-gray-800 animate-bounce-short">${q.answer.char}</h1>
+                <h1 class="text-8xl font-black text-gray-800">${q.answer.char}</h1>
             </div>
 
             <div class="grid grid-cols-2 gap-4 w-full max-w-sm">
@@ -260,7 +258,7 @@ function renderQuizQuestion() {
                     </button>
                 `).join('')}
             </div>
-        </div>
+</div>
     `;
     container.classList.remove('hidden');
 }
@@ -268,10 +266,9 @@ function renderQuizQuestion() {
 function checkAnswer(selectedIdx) {
     const q = quizQuestions[currentQuestionIdx];
     const isCorrect = q.options[selectedIdx].char === q.answer.char;
-    
+
     if (isCorrect) quizScore++;
 
-    // 피드백 효과 (간단히 다음 문제로 넘어감, 실제론 O/X 보여주면 좋음)
     if (currentQuestionIdx < 9) {
         currentQuestionIdx++;
         renderQuizQuestion();
@@ -311,22 +308,21 @@ function closeQuizModal() {
 }
 
 
-// --- 4. 캔버스 로직 (공통) ---
+// --- 4. 캔버스 로직 ---
 function initCanvas() {
     const canvas = document.getElementById('writing-canvas');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    ctx.lineWidth = 14; 
+    ctx.lineWidth = 14;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgba(255, 75, 75, 0.8)'; // JAP-BONG RED
+    ctx.strokeStyle = 'rgba(255, 75, 75, 0.8)';
 
     currentCanvas = canvas;
     currentContext = ctx;
     isDrawing = false;
 
-    // Events
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
@@ -389,7 +385,6 @@ function clearCanvas() {
     }
 }
 
-// 오디오 재생
 function playAudio(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -412,8 +407,10 @@ window.checkAnswer = checkAnswer;
 
 // 로드 시 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    // 탭이 비어있으면 초기화
-    if(!document.getElementById('character-grid').innerHTML.trim()) {
+    const grid = document.getElementById('character-grid');
+    if (grid && !grid.innerHTML.trim()) {
         showCharacterGrid('hiragana');
     }
 });
+
+console.log('characters.js loaded - All-in-One Ver.');
